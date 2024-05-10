@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Task {
+    int id;
+    string name;
+    set<string> tags;
+    int dueDate;
+    mutable bool isCompleted;
+    
+    Task(int id, string name, int dueDate, const set<string> &tags) : id(id), name(name), dueDate(dueDate), tags(tags), isCompleted(false) {
+        
+    }
+};
+
+auto compareTasks = [](const Task &lhs, const Task &rhs) {
+    return lhs.dueDate < rhs.dueDate;
+};
+
+class TodoList {
+private:
+    int nextTaskId = 1;
+    map<int, set<Task, decltype(compareTasks)>> userTaskMap;
+    
+    public:
+    TodoList() {
+//        : userTaskMap(compareTasks)
+    }
+    
+    int addTask(int userId, string &description, int dueDate, vector<string> &tags) {
+        Task newTask(nextTaskId++, description, dueDate, set<string>(tags.begin(), tags.end()));
+        userTaskMap[userId].insert(newTask);
+        return newTask.id;
+    }
+    
+    vector<string> getAllTasks(int userId) {
+        vector<string> allTasks;
+        auto it = userTaskMap.find(userId);
+        if(it != userTaskMap.end()) {
+            for(const Task &task: userTaskMap[userId]) {
+                if(!task.isCompleted)
+                    allTasks.push_back(task.name);
+            }
+        }
+        
+        return allTasks;
+    }
+    
+    vector<string> getTaskForTag(int userId, string &tag) {
+        vector<string> taskList;
+        auto it = userTaskMap.find(userId);
+        if(it != userTaskMap.end()) {
+            for(const Task &task: userTaskMap[userId]) {
+                if(task.tags.count(tag) && !task.isCompleted) 
+                    taskList.push_back(task.name);
+            }
+        }
+        
+        return taskList;
+    }
+    
+    void markCompleted(int userId, int taskId) {
+        auto it = userTaskMap.find(userId);
+        if(it != userTaskMap.end()) {
+            for(const Task &task: userTaskMap[userId]) {
+                if(task.id == taskId) {
+                    task.isCompleted = true;
+                    return;
+                }
+            }
+        }
+    }
+        
+};
